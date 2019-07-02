@@ -14,6 +14,16 @@ class Payload
     /**
      * @var string
      */
+    private $id;
+
+    /**
+     * @var int
+     */
+    private $length;
+
+    /**
+     * @var string
+     */
     private $value;
 
     /**
@@ -23,6 +33,7 @@ class Payload
 
     public function __construct()
     {
+        $this->length = 0;
         $this->children = [];
     }
 
@@ -41,6 +52,44 @@ class Payload
     public function setSchema(DataObjectSchema $schema): self
     {
         $this->schema = $schema;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getId(): string
+    {
+        return $this->id;
+    }
+
+    /**
+     * @param string $id
+     * @return Payload
+     */
+    public function setId(string $id): self
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getLength(): int
+    {
+        return $this->length;
+    }
+
+    /**
+     * @param int $length
+     * @return Payload
+     */
+    public function setLength(int $length): self
+    {
+        $this->length = $length;
 
         return $this;
     }

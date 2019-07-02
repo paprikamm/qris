@@ -121,6 +121,30 @@ class DataObjectSchema
     }
 
     /**
+     * @return bool
+     */
+    public function isIdRange(): bool
+    {
+        return strpos($this->getId(), '-') !== false;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getIdRange(): array
+    {
+        $id = $this->getId();
+
+        if ($this->isIdRange()) {
+            $ids = explode('-', $id);
+
+            return range($ids[0], $ids[1]);
+        }
+
+        return [$id, $id];
+    }
+
+    /**
      * @return string
      */
     public function getLengthType(): string
@@ -218,10 +242,12 @@ class DataObjectSchema
     }
 
     /**
+     * @param string $id
+     * @param int $length
      * @param string $value
      * @return Payload|null
      */
-    public function createPayload(string $value): Payload
+    public function createPayload(string $id, int $length, string $value): Payload
     {
         $len = strlen($value);
         if ($this->getLengthType() === self::LENGTH_TYPE_FIXED && $len != $this->getLength()) {
@@ -237,8 +263,14 @@ class DataObjectSchema
         }
 
         $payload = new Payload();
+        $payload->setId($id);
+        $payload->setLength($length);
         $payload->setSchema($this);
         $payload->setValue($value);
+
+        foreach ($this->getChildren() as $childSchema) {
+
+        }
 
         return $payload;
     }

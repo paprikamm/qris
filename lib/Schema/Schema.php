@@ -29,6 +29,21 @@ class Schema
     }
 
     /**
+     * @return DataObjectSchema[]
+     */
+    public function getMandatoryDataObjects(): array
+    {
+        $dataObjects = [];
+        foreach ($this->getDataObjects() as $dataObject) {
+            if ($dataObject->getRequirement() === DataObjectSchema::REQUIREMENT_MANDATORY) {
+                $dataObjects[] = $dataObject;
+            }
+        }
+
+        return $dataObjects;
+    }
+
+    /**
      * @param string $id
      * @return DataObjectSchema
      */

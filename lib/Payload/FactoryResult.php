@@ -10,6 +10,11 @@ class FactoryResult
     private $valid;
 
     /**
+     * @var string
+     */
+    private $errorMessage;
+
+    /**
      * @var Payload[]
      */
     private $payloads;
@@ -40,6 +45,25 @@ class FactoryResult
     }
 
     /**
+     * @return string
+     */
+    public function getErrorMessage(): string
+    {
+        return $this->errorMessage;
+    }
+
+    /**
+     * @param string $errorMessage
+     * @return FactoryResult
+     */
+    public function setErrorMessage(string $errorMessage): self
+    {
+        $this->errorMessage = $errorMessage;
+
+        return $this;
+    }
+
+    /**
      * @return Payload[]
      */
     public function getPayloads(): array
@@ -56,5 +80,20 @@ class FactoryResult
         $this->payloads[] = $payload;
 
         return $this;
+    }
+
+    /**
+     * @param string $id
+     * @return Payload|null
+     */
+    public function getById(string $id): ?Payload
+    {
+        foreach ($this->getPayloads() as $payload) {
+            if ($payload->getId() == $id) {
+                return $payload;
+            }
+        }
+
+        return null;
     }
 }
