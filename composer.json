@@ -1,0 +1,23 @@
+{
+    "name": "paprikamm/qris",
+    "description": "QRIS reader",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Welly",
+            "email": "welly@paprika.co.id"
+        }
+    ],
+    "require": {
+        "php": ">= 5.3.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Paprika\\": "lib",
+            "Tests\\": "tests"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^8"
+    }
+}
