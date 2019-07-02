@@ -103,7 +103,10 @@ class PayloadFactory
                 $range = $mandatory->getIdRange();
 
                 // check $ids exists in range
-                return count(array_intersect($ids, $range)) > 0;
+                $exists = count(array_intersect($ids, $range)) > 0;
+                if (!$exists) {
+                    return false;
+                }
             } else if (!in_array($mandatory->getId(), $ids)) {
                 return false;
             }
