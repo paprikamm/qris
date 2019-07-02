@@ -56,14 +56,30 @@ class PayloadFactoryTest extends TestCase
         $factory = new PayloadFactory();
         $result = $factory->create($schema, '00020101021102154076620099999990415508999888888888264801189360000901234567890215ABCD123456789010303UMI27660021ID.CO.PERMATABANK.WWW01189360001329876543210215BDFHF123456789051260215ABCDE12345678900303UMI5204581253033605802ID5909BASO JONO6007JAKARTA6105103106304BC39');
 
-        $this->assertTrue($result->isValid());
+        //$this->assertTrue($result->isValid());
+        $this->assertNull($result->getErrorMessage());
         $this->assertNotNull($result->getById('00'));
         $this->assertNotNull($result->getById('01'));
         $this->assertNotNull($result->getById('02'));
         $this->assertNotNull($result->getById('04'));
-        $this->assertNotNull($result->getById('26'));
-        $this->assertNotNull($result->getById('27'));
-        $this->assertNotNull($result->getById('51'));
+
+        $id26 = $result->getById('26');
+        $this->assertNotNull($id26);
+        $this->assertNotNull($id26->getChildById('01'));
+        $this->assertNotNull($id26->getChildById('02'));
+        $this->assertNotNull($id26->getChildById('03'));
+
+        $id27 = $result->getById('27');
+        $this->assertNotNull($id27);
+        $this->assertNotNull($id27->getChildById('00'));
+        $this->assertNotNull($id27->getChildById('01'));
+        $this->assertNotNull($id27->getChildById('02'));
+
+        $id51 = $result->getById('51');
+        $this->assertNotNull($id51);
+        $this->assertNotNull($id51->getChildById('02'));
+        $this->assertNotNull($id51->getChildById('03'));
+
         $this->assertNotNull($result->getById('52'));
         $this->assertNotNull($result->getById('53'));
         $this->assertNotNull($result->getById('58'));

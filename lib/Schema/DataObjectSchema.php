@@ -54,6 +54,11 @@ class DataObjectSchema
     private $callback;
 
     /**
+     * @var callback
+     */
+    private $childrenCallback;
+
+    /**
      * @var DataObjectSchema[]
      */
     private $children;
@@ -221,9 +226,28 @@ class DataObjectSchema
     }
 
     /**
-     * @return callable
+     * @param string $id
+     * @return DataObjectSchema|null
      */
-    public function getCallback(): callable
+    public function getChildById(string $id): ?DataObjectSchema
+    {
+        foreach ($this->getChildren() as $child) {
+            if ($child->isIdRange()) {
+                if (in_array($id, $child->getIdRange())) {
+                    return $child;
+                }
+            } else if ($child->getId() == $id) {
+                return $child;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @return callable|null
+     */
+    public function getCallback(): ?callable
     {
         return $this->callback;
     }
@@ -242,12 +266,36 @@ class DataObjectSchema
     }
 
     /**
+     * @return callable|null
+     */
+    public function getChildrenCallback(): ?callable
+    {
+        return $this->childrenCallback;
+    }
+
+    /**
+     * ChildrenCallback will be passed DataObjectSchema and Payload as parameters and must return boolean.
+     * ChildrenCallback will be used to show whether children need to be processed or not.
+     * @TODO refactor so that we dont need children callback
+     *
+     * @param callable $childrenCallback
+     * @return DataObjectSchema
+     */
+    public function setChildrenCallback(callable $childrenCallback = null): self
+    {
+        $this->childrenCallback = $childrenCallback;
+
+        return $this;
+    }
+
+    /**
+     * @param Schema $schema
      * @param string $id
      * @param int $length
      * @param string $value
      * @return Payload|null
      */
-    public function createPayload(string $id, int $length, string $value): Payload
+    public function createPayload(Schema $schema, string $id, int $length, string $value): ?Payload
     {
         $len = strlen($value);
         if ($this->getLengthType() === self::LENGTH_TYPE_FIXED && $len != $this->getLength()) {
@@ -268,10 +316,66 @@ class DataObjectSchema
         $payload->setSchema($this);
         $payload->setValue($value);
 
-        foreach ($this->getChildren() as $childSchema) {
+        $valid = $this->createChildrenPayload($schema, $payload, $value);
+        if (!$valid) {
+            return null;
+        }
 
+        $callback = $this->getCallback();
+        if ($callback) {
+            $valid = $callback($schema, $payload);
+            if (!$valid) {
+                return null;
+            }
         }
 
         return $payload;
+    }
+
+    /**
+     * @param Schema $schema
+     * @param Payload $payload
+     * @param string $code
+     * @return bool
+     */
+    private function createChildrenPayload(Schema $schema, Payload $payload, string $code): bool
+    {
+        if (count($this->getChildren()) <= 0) {
+            return true;
+        }
+        $childrenCallback = $this->getChildrenCallback();
+        if ($childrenCallback) {
+            $needProcess = $childrenCallback($this, $payload);
+            if (!$needProcess) {
+                return true;
+            }
+        }
+
+        $codeLength = strlen($code);
+        $index = 0;
+        while ($index < $codeLength) {
+            $id = substr($code, $index, 2);
+            $index += 2;
+
+            $length = (int) substr($code, $index, 2);
+            $index += 2;
+
+            $value = substr($code, $index, $length);
+            $index += $length;
+
+            $objectSchema = $this->getChildById($id);
+            if (!$objectSchema) {
+                return false;
+            }
+
+            $childPayload = $objectSchema->createPayload($schema, $id, $length, $value);
+            if (!$childPayload) {
+                return false;
+            }
+
+            $payload->addChild($childPayload);
+        }
+
+        return true;
     }
 }

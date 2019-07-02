@@ -2,6 +2,8 @@
 
 namespace Paprika\Schema;
 
+use Paprika\Payload\Payload;
+
 class SchemaFactory
 {
     public function createV01(): Schema
@@ -307,7 +309,15 @@ class SchemaFactory
             DataObjectSchema::FORMAT_ALPHA,
             DataObjectSchema::LENGTH_TYPE_MAXIMUM,
             99,
-            DataObjectSchema::REQUIREMENT_MANDATORY
+            DataObjectSchema::REQUIREMENT_MANDATORY,
+            null,
+            function (DataObjectSchema $schema, Payload $payload) {
+                if ($payload->getId() >= 2 && $payload->getId() <= 25) {
+                    return false;
+                }
+
+                return true;
+            }
         );
 
         $dataObject->addChild($this->createDataObject(
@@ -454,9 +464,13 @@ class SchemaFactory
      * @param $length
      * @param $requirement
      * @param callable|null $callback
+     * @param callable|null $childrenCallback
      * @return DataObjectSchema
      */
-    private function createDataObject($name, $id, $format, $lengthType, $length, $requirement, $callback = null): DataObjectSchema
+    private function createDataObject(
+        $name, $id, $format, $lengthType, $length, $requirement,
+        $callback = null, $childrenCallback = null
+    ): DataObjectSchema
     {
         $dataObject = new DataObjectSchema();
         $dataObject->setName($name);
@@ -466,6 +480,7 @@ class SchemaFactory
         $dataObject->setLength($length);
         $dataObject->setRequirement($requirement);
         $dataObject->setCallback($callback);
+        $dataObject->setChildrenCallback($childrenCallback);
 
         return $dataObject;
     }

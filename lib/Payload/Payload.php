@@ -131,4 +131,19 @@ class Payload
 
         return $this;
     }
+
+    /**
+     * @param string $id
+     * @return Payload|null
+     */
+    public function getChildById(string $id): ?Payload
+    {
+        foreach ($this->getChildren() as $child) {
+            if ($child->getId() == $id) {
+                return $child;
+            }
+        }
+
+        return null;
+    }
 }

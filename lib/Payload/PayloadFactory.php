@@ -36,9 +36,9 @@ class PayloadFactory
                 return $result;
             }
 
-            $payload = $objectSchema->createPayload($id, $length, $value);
+            $payload = $objectSchema->createPayload($schema, $id, $length, $value);
             if (!$payload) {
-                $result->setErrorMessage(sprintf('Value %s not valid', $value));
+                $result->setErrorMessage(sprintf('Value %s not valid (index %s)', $value, $index));
                 return $result;
             }
 
