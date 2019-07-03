@@ -15,14 +15,14 @@ class FactoryResult
     private $errorMessage;
 
     /**
-     * @var Payload[]
+     * @var PayloadRoot
      */
-    private $payloads;
+    private $payloadRoot;
 
-    public function __construct()
+    public function __construct(PayloadRoot $payloadRoot)
     {
         $this->valid = false;
-        $this->payloads = [];
+        $this->payloadRoot = $payloadRoot;
     }
 
     /**
@@ -64,11 +64,30 @@ class FactoryResult
     }
 
     /**
+     * @return PayloadRoot
+     */
+    public function getPayloadRoot(): PayloadRoot
+    {
+        return $this->payloadRoot;
+    }
+
+    /**
+     * @param PayloadRoot $payloadRoot
+     * @return PayloadRoot
+     */
+    public function setPayloadRoot(PayloadRoot $payloadRoot): self
+    {
+        $this->payloadRoot = $payloadRoot;
+
+        return $this;
+    }
+
+    /**
      * @return Payload[]
      */
     public function getPayloads(): array
     {
-        return $this->payloads;
+        return $this->payloadRoot->getPayloads();
     }
 
     /**
@@ -77,7 +96,7 @@ class FactoryResult
      */
     public function addPayload(Payload $payload): self
     {
-        $this->payloads[] = $payload;
+        $this->payloadRoot->addPayload($payload);
 
         return $this;
     }
@@ -88,12 +107,6 @@ class FactoryResult
      */
     public function getById(string $id): ?Payload
     {
-        foreach ($this->getPayloads() as $payload) {
-            if ($payload->getId() == $id) {
-                return $payload;
-            }
-        }
-
-        return null;
+        return $this->payloadRoot->getById($id);
     }
 }

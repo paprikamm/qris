@@ -3,6 +3,7 @@
 namespace Paprika\Schema;
 
 use Paprika\Payload\Payload;
+use Paprika\Payload\PayloadRoot;
 
 class SchemaFactory
 {
@@ -65,7 +66,20 @@ class SchemaFactory
             DataObjectSchema::FORMAT_ALPHA,
             DataObjectSchema::LENGTH_TYPE_MAXIMUM,
             13,
-            DataObjectSchema::REQUIREMENT_CONDITIONAL
+            DataObjectSchema::REQUIREMENT_CONDITIONAL,
+            function (PayloadRoot $payloadRoot, Payload $payload) {
+                $typePayload = $payloadRoot->getById('01');
+                if (!$typePayload || $typePayload->getValue() != '12') {
+                    return false;
+                }
+
+                // @TODO check other currencies
+                if (!preg_match("/^[0-9]+(\.)?[0-9]*$/i", $payload->getValue())) {
+                    return false;
+                }
+
+                return true;
+            }
         ));
 
         $schema->addDataObject($this->createDataObject(

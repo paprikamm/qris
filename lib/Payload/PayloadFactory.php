@@ -15,8 +15,10 @@ class PayloadFactory
      */
     public function create(Schema $schema, $code): FactoryResult
     {
-        $result = new FactoryResult();
-        $result->setValid(false);
+        $payloadRoot = new PayloadRoot();
+        $payloadRoot->setSchema($schema);
+
+        $result = new FactoryResult($payloadRoot);
 
         $codeLength = strlen($code);
         $index = 0;
@@ -36,7 +38,7 @@ class PayloadFactory
                 return $result;
             }
 
-            $payload = $objectSchema->createPayload($schema, $id, $length, $value);
+            $payload = $objectSchema->createPayload($payloadRoot, $id, $length, $value);
             if (!$payload) {
                 $result->setErrorMessage(sprintf('Value %s not valid (index %s)', $value, $index));
                 return $result;

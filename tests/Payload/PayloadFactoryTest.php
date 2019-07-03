@@ -14,10 +14,10 @@ class PayloadFactoryTest extends TestCase
         $schema = $schemaFactory->createV01();
 
         $factory = new PayloadFactory();
-        $result = $factory->create($schema, '01021102154076620099999990415508999888888888264801189360000901234567890215ABCD123456789010303UMI27660021ID.CO.PERMATABANK.WWW01189360001329876543210215BDFHF123456789051260215ABCDE12345678900303UMI5204581253033605802ID5909BASO JONO6007JAKARTA6105103106304BC39');
+        $result = $factory->create($schema, '01021100020102154076620099999990415508999888888888264801189360000901234567890215ABCD123456789010303UMI27660021ID.CO.PERMATABANK.WWW01189360001329876543210215BDFHF123456789051260215ABCDE12345678900303UMI5204581253033605802ID5909BASO JONO6007JAKARTA6105103106304BC39');
 
         $this->assertFalse($result->isValid());
-        $this->assertNotNull($result->getErrorMessage());
+        $this->assertEquals('QR must begin with 00', $result->getErrorMessage());
     }
 
     public function testCodeNotEndsWithCRC()
@@ -26,10 +26,10 @@ class PayloadFactoryTest extends TestCase
         $schema = $schemaFactory->createV01();
 
         $factory = new PayloadFactory();
-        $result = $factory->create($schema, '00020101021102154076620099999990415508999888888888264801189360000901234567890215ABCD123456789010303UMI27660021ID.CO.PERMATABANK.WWW01189360001329876543210215BDFHF123456789051260215ABCDE12345678900303UMI5204581253033605802ID5909BASO JONO6007JAKARTA610510310');
+        $result = $factory->create($schema, '0002016304BC3901021102154076620099999990415508999888888888264801189360000901234567890215ABCD123456789010303UMI27660021ID.CO.PERMATABANK.WWW01189360001329876543210215BDFHF123456789051260215ABCDE12345678900303UMI5204581253033605802ID5909BASO JONO6007JAKARTA610510310');
 
         $this->assertFalse($result->isValid());
-        $this->assertNotNull($result->getErrorMessage());
+        $this->assertEquals('QR must end with CRC', $result->getErrorMessage());
     }
 
     public function testWrongFormat()
@@ -42,7 +42,7 @@ class PayloadFactoryTest extends TestCase
         $result = $factory->create($schema, '00020101021102134076620099999990415508999888888888264801189360000901234567890215ABCD123456789010303UMI27660021ID.CO.PERMATABANK.WWW01189360001329876543210215BDFHF123456789051260215ABCDE12345678900303UMI5204581253033605802ID5909BASO JONO6007JAKARTA6105103106304BC39');
 
         $this->assertFalse($result->isValid());
-        $this->assertNotNull($result->getErrorMessage());
+        $this->assertEquals('Value 9876543210215BDFHF12345678905126 not valid (index 176)', $result->getErrorMessage());
     }
 
     public function testMandatoriesNotIncluded()
@@ -54,25 +54,22 @@ class PayloadFactoryTest extends TestCase
         $result = $factory->create($schema, '00020101021102154076620099999990415508999888888888264801189360000901234567890215ABCD123456789010303UMI27660021ID.CO.PERMATABANK.WWW01189360001329876543210215BDFHF123456789051260215ABCDE12345678900303UMI53033605802ID5909BASO JONO6007JAKARTA6105103106304BC39');
 
         $this->assertFalse($result->isValid());
-        $this->assertNotNull($result->getErrorMessage());
+        $this->assertEquals('Mandatory fields are missing', $result->getErrorMessage());
     }
 
-    public function testWrongAmount()
+    public function testWrongFormatAmount()
     {
+        $schemaFactory = new SchemaFactory();
+        $schema = $schemaFactory->createV01();
 
+        $factory = new PayloadFactory();
+        $result = $factory->create($schema, '00020101021102154076620099999990415508999888888888264801189360000901234567890215ABCD123456789010303UMI27660021ID.CO.PERMATABANK.WWW01189360001329876543210215BDFHF123456789051260215ABCDE12345678900303UMI5204581253033605409100000,005802ID5909BASO JONO6007JAKARTA6105103106304E7DF');
+
+        $this->assertFalse($result->isValid());
+        $this->assertEquals('Value 100000,00 not valid (index 230)', $result->getErrorMessage());
     }
 
-    public function testWrongAmountFormat()
-    {
-
-    }
-
-    public function testConvenience()
-    {
-
-    }
-
-    public function testSuccess()
+    public function testSuccessWithoutAmount()
     {
         $schemaFactory = new SchemaFactory();
         $schema = $schemaFactory->createV01();
@@ -111,5 +108,35 @@ class PayloadFactoryTest extends TestCase
         $this->assertNotNull($result->getById('60'));
         $this->assertNotNull($result->getById('61'));
         $this->assertNotNull($result->getById('63'));
+    }
+
+    public function testSuccessWithAmount()
+    {
+        $schemaFactory = new SchemaFactory();
+        $schema = $schemaFactory->createV01();
+
+        $factory = new PayloadFactory();
+        $result = $factory->create($schema, '00020101021202154076620099999990415508999888888888264801189360000901234567890215ABCD123456789010303UMI27660021ID.CO.PERMATABANK.WWW01189360001329876543210215BDFHF123456789051260215ABCDE12345678900303UMI5204581253033605409100000.005802ID5909BASO JONO6007JAKARTA610510310630428F4');
+
+        $this->assertTrue($result->isValid());
+        $this->assertNull($result->getErrorMessage());
+        $this->assertNotNull($result->getById('54'));
+        $this->assertEquals('100000.00', $result->getById('54')->getValue());
+    }
+
+    public function testConvenienceSuccess()
+    {
+        $schemaFactory = new SchemaFactory();
+        $schema = $schemaFactory->createV01();
+
+        $factory = new PayloadFactory();
+        $result = $factory->create($schema, '00020101021202154076620099999990415508999888888888264801189360000901234567890215ABCD123456789010303UMI27660021ID.CO.PERMATABANK.WWW01189360001329876543210215BDFHF123456789051260215ABCDE12345678900303UMI5204581253033605409100000.00550202560410005802ID5909BASO JONO6007JAKARTA6105103106304C007');
+
+        $this->assertTrue($result->isValid());
+        $this->assertNull($result->getErrorMessage());
+        $this->assertNotNull($result->getById('55'));
+        $this->assertEquals('02', $result->getById('55')->getValue());
+        $this->assertNotNull($result->getById('56'));
+        $this->assertEquals('1000', $result->getById('56')->getValue());
     }
 }

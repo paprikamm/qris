@@ -3,6 +3,7 @@
 namespace Paprika\Schema;
 
 use Paprika\Payload\Payload;
+use Paprika\Payload\PayloadRoot;
 
 class DataObjectSchema
 {
@@ -253,7 +254,7 @@ class DataObjectSchema
     }
 
     /**
-     * Callback will be passed Schema and Payload as parameters and must return boolean as validation result
+     * Callback will be passed PayloadRoot and Payload as parameters and must return boolean as validation result
      *
      * @param callable $callback
      * @return DataObjectSchema
@@ -289,14 +290,15 @@ class DataObjectSchema
     }
 
     /**
-     * @param Schema $schema
+     * @param PayloadRoot $payloadRoot
      * @param string $id
      * @param int $length
      * @param string $value
      * @return Payload|null
      */
-    public function createPayload(Schema $schema, string $id, int $length, string $value): ?Payload
+    public function createPayload(PayloadRoot $payloadRoot, string $id, int $length, string $value): ?Payload
     {
+        $schema = $payloadRoot->getSchema();
         $len = strlen($value);
         if ($this->getLengthType() === self::LENGTH_TYPE_FIXED && $len != $this->getLength()) {
             return null;
@@ -316,14 +318,14 @@ class DataObjectSchema
         $payload->setSchema($this);
         $payload->setValue($value);
 
-        $valid = $this->createChildrenPayload($schema, $payload, $value);
+        $valid = $this->createChildrenPayload($payloadRoot, $payload, $value);
         if (!$valid) {
             return null;
         }
 
         $callback = $this->getCallback();
         if ($callback) {
-            $valid = $callback($schema, $payload);
+            $valid = $callback($payloadRoot, $payload);
             if (!$valid) {
                 return null;
             }
@@ -333,12 +335,12 @@ class DataObjectSchema
     }
 
     /**
-     * @param Schema $schema
+     * @param PayloadRoot $payloadRoot
      * @param Payload $payload
      * @param string $code
      * @return bool
      */
-    private function createChildrenPayload(Schema $schema, Payload $payload, string $code): bool
+    private function createChildrenPayload(PayloadRoot $payloadRoot, Payload $payload, string $code): bool
     {
         if (count($this->getChildren()) <= 0) {
             return true;
@@ -368,7 +370,7 @@ class DataObjectSchema
                 return false;
             }
 
-            $childPayload = $objectSchema->createPayload($schema, $id, $length, $value);
+            $childPayload = $objectSchema->createPayload($payloadRoot, $id, $length, $value);
             if (!$childPayload) {
                 return false;
             }
