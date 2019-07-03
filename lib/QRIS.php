@@ -2,7 +2,7 @@
 
 namespace Paprika;
 
-use Paprika\Payload\Payload;
+use Paprika\Payload\PayloadRoot;
 
 /**
  * This class is used as a convenient class that's easy to use
@@ -15,15 +15,25 @@ class QRIS
     const METHOD_STATIC = 'static';
     const METHOD_DYNAMIC = 'dynamic';
 
+    const CONVENIENCE_TYPE_NONE = 'none';
+    const CONVENIENCE_TYPE_FIXED = 'fixed';
+    const CONVENIENCE_TYPE_PERCENTAGE = 'percentage';
+    const CONVENIENCE_TYPE_BOTH = 'both';
+
     /**
      * @var string
      */
     public $method;
 
     /**
-     * @var string
+     * @var MerchantAccountInformation[]
      */
-    public $merchantID;
+    public $merchantAccounts;
+
+    /**
+     * @var AdditionalField[]
+     */
+    public $additionalFields;
 
     /**
      * Merchant category code
@@ -42,17 +52,22 @@ class QRIS
     /**
      * @var int
      */
-    public $amount;
+    public $amount = 0;
+
+    /**
+     * @var string
+     */
+    public $convenienceType;
 
     /**
      * @var float
      */
-    public $convenienceAmount;
+    public $convenienceAmount = 0;
 
     /**
      * @var float
      */
-    public $conveniencePercentage;
+    public $conveniencePercentage = 0;
 
     /**
      * @var int
@@ -75,7 +90,7 @@ class QRIS
     public $postalCode;
 
     /**
-     * @var Payload[]
+     * @var PayloadRoot
      */
-    public $payloads = [];
+    public $payloadRoot;
 }

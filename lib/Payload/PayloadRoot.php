@@ -73,4 +73,27 @@ class PayloadRoot
 
         return null;
     }
+
+    /**
+     * @param string $id
+     * @return Payload[]
+     */
+    public function getByIdRange(string $id): array
+    {
+        $payloads = [];
+        $idRanges = explode(',', $id);
+        $range = [];
+        foreach ($idRanges as $idRange) {
+            $ids = explode('-', $idRange);
+            $range = array_merge($range, range($ids[0], $ids[1]));
+        }
+
+        foreach ($this->getPayloads() as $payload) {
+            if (in_array($payload->getId(), $range)) {
+                $payloads[] = $payload;
+            }
+        }
+
+        return $payloads;
+    }
 }
