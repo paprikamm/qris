@@ -28,12 +28,12 @@ class QRIS
     /**
      * @var MerchantAccountInformation[]
      */
-    public $merchantAccounts;
+    public $merchantAccounts = [];
 
     /**
      * @var AdditionalField[]
      */
-    public $additionalFields;
+    public $additionalFields = [];
 
     /**
      * Merchant category code

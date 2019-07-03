@@ -66,6 +66,10 @@ class QRISReader
             $merchantAccount = new MerchantAccountInformation();
             $merchantAccount->id = $schemaId;
 
+            if ($schemaId >= 2 && $schemaId <= 25) {
+                $merchantAccount->uniqueID = $merchantPayload->getValue();
+            }
+
             if ($schemaId >= 2 && $schemaId <= 3) {
                 $merchantAccount->type = MerchantAccountInformation::TYPE_VISA;
             } else if ($schemaId >= 4 && $schemaId <= 5) {
